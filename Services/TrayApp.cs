@@ -23,6 +23,7 @@ public sealed class TrayApp : IDisposable
         {
             EdgeLauncher.KillAll("msedge");
             EdgeLauncher.KillAll("chrome");
+            UnlockSession.ClearAll();
         };
         quitItem.Click += (_, _) =>
         {

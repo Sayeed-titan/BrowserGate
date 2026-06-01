@@ -23,6 +23,10 @@ public static class AutoRelock
 
             // kill any that may have come back (lingering helpers)
             EdgeLauncher.KillAll(name);
+            // clear the session so the next launch goes back through the lock
+            var exeKey = name.Equals("chrome", StringComparison.OrdinalIgnoreCase)
+                ? IFEORegistrar.ChromeExe : IFEORegistrar.EdgeExe;
+            UnlockSession.Clear(exeKey);
         });
     }
 }

@@ -84,6 +84,22 @@ public partial class App : Application
 
         if (browserExeKey != null)
         {
+            // If the browser was already unlocked this session, pass through
+            // silently. Chrome/Edge re-exec themselves with switches that don't
+            // carry --type=, so IFEO catches them; the session token tells us
+            // the user already authenticated.
+            if (UnlockSession.IsUnlocked(browserExeKey))
+            {
+                try
+                {
+                    ElevatedHelper.Log($"Pass-through (session unlocked): {browserExeKey} args={forwarded.Count}");
+                    ElevatedHelper.RequestLaunch(browserExeKey, browserExePath, forwarded.ToArray());
+                }
+                catch (Exception ex) { ElevatedHelper.Log("Pass-through FAIL: " + ex.Message); }
+                Shutdown();
+                return;
+            }
+
             var prompt = new PasswordPromptWindow(browserExeKey, browserExePath, forwarded.ToArray());
             prompt.Closed += (_, _) => Shutdown();
             prompt.Show();

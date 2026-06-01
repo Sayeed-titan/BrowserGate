@@ -42,6 +42,7 @@ public partial class PasswordPromptWindow : Window
 
         try
         {
+            UnlockSession.Mark(_browserExeKey);
             ElevatedHelper.RequestLaunch(_browserExeKey, _browserExePath, _forwardedArgs);
             string processName = _browserExeKey.Equals("chrome.exe", StringComparison.OrdinalIgnoreCase)
                 ? "chrome" : "msedge";
