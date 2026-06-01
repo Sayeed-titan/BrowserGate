@@ -20,9 +20,27 @@ public static class UnlockSession
 
     public static bool IsUnlocked(string browserExeKey)
     {
-        if (!File.Exists(TokenPath(browserExeKey))) return false;
-        // Stale-token guard: if no browser process is running, the previous
-        // session ended (e.g. reboot, force-quit). Clear and require re-auth.
+        var path = TokenPath(browserExeKey);
+        if (!File.Exists(path)) return false;
+
+        // Grace window: a freshly written token is always trusted. This covers
+        // the gap between Process.Start of the browser and the first IFEO
+        // re-exec — Chrome briefly has zero visible chrome.exe processes
+        // while it relaunches itself, and we must NOT clear the token then.
+        try
+        {
+            var text = File.ReadAllText(path);
+            if (DateTime.TryParse(text, null,
+                    System.Globalization.DateTimeStyles.RoundtripKind, out var ts))
+            {
+                if ((DateTime.UtcNow - ts).TotalSeconds < 60) return true;
+            }
+        }
+        catch { /* fall through to the process check */ }
+
+        // Stale-token guard: token is older than the grace window AND no
+        // browser process is running → the previous session ended (reboot,
+        // force-quit, AutoRelock). Clear and require re-auth.
         var procName = browserExeKey.Equals("chrome.exe", StringComparison.OrdinalIgnoreCase)
             ? "chrome" : "msedge";
         if (System.Diagnostics.Process.GetProcessesByName(procName).Length == 0)
