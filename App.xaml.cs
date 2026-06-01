@@ -29,14 +29,17 @@ public partial class App : Application
             }
             if (a.Equals("--elevated-launch", StringComparison.OrdinalIgnoreCase))
             {
-                var cfg = ConfigStore.Exists() ? ConfigStore.Load() : new AppConfig();
+                ElevatedHelper.Log("--elevated-launch started");
                 var req = ElevatedHelper.ReadAndClearLaunchRequest();
                 if (req.HasValue)
                 {
-                    var (exeKey, args) = req.Value;
-                    var browserPath = exeKey.Equals("chrome.exe", StringComparison.OrdinalIgnoreCase)
-                        ? cfg.ChromePath : cfg.EdgePath;
-                    try { EdgeLauncher.LaunchBrowser(exeKey, browserPath, args); } catch { }
+                    var (exeKey, exePath, args) = req.Value;
+                    try
+                    {
+                        EdgeLauncher.LaunchBrowser(exeKey, exePath, args);
+                        ElevatedHelper.Log($"LaunchBrowser OK: {exePath}");
+                    }
+                    catch (Exception ex) { ElevatedHelper.Log("LaunchBrowser FAIL: " + ex.Message); }
                 }
                 Shutdown(); return;
             }
@@ -57,16 +60,19 @@ public partial class App : Application
         }
 
         // ===== Lock mode (we were invoked as IFEO Debugger) =====
+        // IFEO passes: <original-exe-full-path> <original-args...>
         string? browserExeKey = null;
+        string browserExePath = "";
         var forwarded = new List<string>();
         foreach (var a in e.Args)
         {
-            if (a.IndexOf("msedge.exe", StringComparison.OrdinalIgnoreCase) >= 0)
-            { browserExeKey = "msedge.exe"; continue; }
-            if (a.IndexOf("chrome.exe", StringComparison.OrdinalIgnoreCase) >= 0)
-            { browserExeKey = "chrome.exe"; continue; }
+            if (browserExeKey == null && a.IndexOf("msedge.exe", StringComparison.OrdinalIgnoreCase) >= 0)
+            { browserExeKey = "msedge.exe"; browserExePath = a; continue; }
+            if (browserExeKey == null && a.IndexOf("chrome.exe", StringComparison.OrdinalIgnoreCase) >= 0)
+            { browserExeKey = "chrome.exe"; browserExePath = a; continue; }
             forwarded.Add(a);
         }
+        ElevatedHelper.Log($"Lock-mode args: key={browserExeKey} path={browserExePath} extra={forwarded.Count}");
 
         if (!ConfigStore.Exists())
         {
@@ -78,7 +84,7 @@ public partial class App : Application
 
         if (browserExeKey != null)
         {
-            var prompt = new PasswordPromptWindow(browserExeKey, forwarded.ToArray());
+            var prompt = new PasswordPromptWindow(browserExeKey, browserExePath, forwarded.ToArray());
             prompt.Closed += (_, _) => Shutdown();
             prompt.Show();
             return;

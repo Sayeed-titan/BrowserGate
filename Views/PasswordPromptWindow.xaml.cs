@@ -8,13 +8,15 @@ public partial class PasswordPromptWindow : Window
 {
     private readonly string[] _forwardedArgs;
     private readonly string _browserExeKey;
+    private readonly string _browserExePath;
     private int _attempts;
 
-    public PasswordPromptWindow(string browserExeKey, string[] forwardedArgs)
+    public PasswordPromptWindow(string browserExeKey, string browserExePath, string[] forwardedArgs)
     {
         InitializeComponent();
         _forwardedArgs = forwardedArgs;
         _browserExeKey = browserExeKey;
+        _browserExePath = browserExePath;
         string display = browserExeKey.Equals("chrome.exe", StringComparison.OrdinalIgnoreCase)
             ? "Google Chrome" : "Microsoft Edge";
         TitleTxt.Text = $"{display} is locked";
@@ -40,7 +42,7 @@ public partial class PasswordPromptWindow : Window
 
         try
         {
-            ElevatedHelper.RequestLaunch(_browserExeKey, _forwardedArgs);
+            ElevatedHelper.RequestLaunch(_browserExeKey, _browserExePath, _forwardedArgs);
             string processName = _browserExeKey.Equals("chrome.exe", StringComparison.OrdinalIgnoreCase)
                 ? "chrome" : "msedge";
             AutoRelock.Schedule(processName, cfg.AutoRelockMinutes);

@@ -42,22 +42,35 @@ public static class ElevatedHelper
         catch { return false; }
     }
 
-    public static void RequestLaunch(string browserExeKey, string[] forwardedArgs)
+    public static void RequestLaunch(string browserExeKey, string browserExePath, string[] forwardedArgs)
     {
         Directory.CreateDirectory(RequestDir());
-        var payload = browserExeKey + "\n" + string.Join("\n", forwardedArgs);
-        File.WriteAllText(LaunchRequestPath(), payload);
+        var lines = new List<string> { browserExeKey, browserExePath };
+        lines.AddRange(forwardedArgs);
+        File.WriteAllLines(LaunchRequestPath(), lines);
+        Log($"RequestLaunch: key={browserExeKey} path={browserExePath} args={forwardedArgs.Length}");
         RunSchtasks($"/run /tn \"{TaskName}\"");
     }
 
-    public static (string exeKey, string[] args)? ReadAndClearLaunchRequest()
+    public static (string exeKey, string exePath, string[] args)? ReadAndClearLaunchRequest()
     {
         var path = LaunchRequestPath();
-        if (!File.Exists(path)) return null;
+        if (!File.Exists(path)) { Log("ReadLaunchRequest: file not found"); return null; }
         var lines = File.ReadAllLines(path);
         try { File.Delete(path); } catch { }
-        if (lines.Length == 0) return null;
-        return (lines[0], lines.Skip(1).ToArray());
+        if (lines.Length < 2) { Log("ReadLaunchRequest: malformed"); return null; }
+        return (lines[0], lines[1], lines.Skip(2).ToArray());
+    }
+
+    public static void Log(string msg)
+    {
+        try
+        {
+            Directory.CreateDirectory(RequestDir());
+            File.AppendAllText(Path.Combine(RequestDir(), "debug.log"),
+                $"[{DateTime.Now:HH:mm:ss}] {msg}\n");
+        }
+        catch { }
     }
 
     private static void RunSchtasks(string args)
