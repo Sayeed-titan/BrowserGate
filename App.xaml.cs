@@ -39,17 +39,20 @@ public partial class App : Application
             if (a.Equals("--elevated-launch", StringComparison.OrdinalIgnoreCase))
             {
                 ElevatedHelper.Log("--elevated-launch started");
-                var req = ElevatedHelper.ReadAndClearLaunchRequest();
-                if (req.HasValue)
+                // Brief settle so concurrent requests landing in the same
+                // moment (Chrome new-tab burst) end up in the same drain.
+                System.Threading.Thread.Sleep(200);
+                var items = ElevatedHelper.DrainAllRequests();
+                if (items.Count > 0)
                 {
-                    var (exeKey, exePath, args) = req.Value;
                     try
                     {
-                        EdgeLauncher.LaunchBrowser(exeKey, exePath, args);
-                        ElevatedHelper.Log($"LaunchBrowser OK: {exePath}");
+                        EdgeLauncher.LaunchBatch(items);
+                        ElevatedHelper.Log($"LaunchBatch OK: {items.Count} item(s)");
                     }
-                    catch (Exception ex) { ElevatedHelper.Log("LaunchBrowser FAIL: " + ex.Message); }
+                    catch (Exception ex) { ElevatedHelper.Log("LaunchBatch FAIL: " + ex.Message); }
                 }
+                else { ElevatedHelper.Log("--elevated-launch: no pending requests"); }
                 Shutdown(); return;
             }
             if (a.Equals("--apply", StringComparison.OrdinalIgnoreCase))

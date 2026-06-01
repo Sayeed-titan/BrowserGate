@@ -1,7 +1,7 @@
 <Window x:Class="BrowserGate.Views.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="BrowserGate" Height="640" Width="540"
+        Title="BrowserGate" Height="780" Width="540"
         Icon="pack://application:,,,/BrowserGate.ico"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"

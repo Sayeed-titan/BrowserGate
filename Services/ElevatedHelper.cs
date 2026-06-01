@@ -5,11 +5,16 @@ namespace BrowserGate.Services;
 
 /// <summary>
 /// IFEO launches BrowserGate unelevated. The registry-toggle step needs admin.
-/// Solution: at install time we create a Windows Scheduled Task running as the
-/// current user with HIGHEST privileges. The unprivileged lock prompt writes
-/// a launch request, then triggers the task — which spawns an elevated
-/// BrowserGate.exe --elevated-launch that performs the IFEO toggle + browser start.
-/// Works without UAC prompt for users in the Administrators group.
+/// At install time we create a Windows Scheduled Task running as the current
+/// user with HIGHEST privileges. The unprivileged lock prompt writes a launch
+/// request file, then triggers the task — which spawns an elevated
+/// BrowserGate.exe --elevated-launch that performs the IFEO toggle + browser
+/// start. Works without UAC prompt for users in the Administrators group.
+///
+/// IMPORTANT: each request gets a unique file name. Chrome re-execs itself
+/// 2–3 times in the same instant when opening a new tab — overwriting a
+/// single shared launch.req loses requests and tabs hang. The elevated
+/// pass drains ALL pending request files in one go.
 /// </summary>
 public static class ElevatedHelper
 {
@@ -18,12 +23,11 @@ public static class ElevatedHelper
     private static string RequestDir() => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "BrowserGate");
 
-    public static string LaunchRequestPath() => Path.Combine(RequestDir(), "launch.req");
+    private static string PendingDir() => Path.Combine(RequestDir(), "pending");
 
     public static void InstallTask(string exePath)
     {
         var user = $"{Environment.UserDomainName}\\{Environment.UserName}";
-        // /sc once with a far-future date = no scheduled trigger; we always use /run
         var args =
             $"/create /tn \"{TaskName}\" " +
             $"/tr \"\\\"{exePath}\\\" --elevated-launch\" " +
@@ -44,22 +48,41 @@ public static class ElevatedHelper
 
     public static void RequestLaunch(string browserExeKey, string browserExePath, string[] forwardedArgs)
     {
-        Directory.CreateDirectory(RequestDir());
+        Directory.CreateDirectory(PendingDir());
+        // Unique filename per request — no shared file, no clobbering when
+        // Chrome fires 3 concurrent re-execs in the same instant.
+        var fileName = $"req_{DateTime.UtcNow:yyyyMMddHHmmssfff}_{Guid.NewGuid():N}.txt";
+        var fullPath = Path.Combine(PendingDir(), fileName);
         var lines = new List<string> { browserExeKey, browserExePath };
         lines.AddRange(forwardedArgs);
-        File.WriteAllLines(LaunchRequestPath(), lines);
-        Log($"RequestLaunch: key={browserExeKey} path={browserExePath} args={forwardedArgs.Length}");
+        File.WriteAllLines(fullPath, lines);
+        Log($"Queued request: {fileName} key={browserExeKey} args={forwardedArgs.Length}");
         RunSchtasks($"/run /tn \"{TaskName}\"");
     }
 
-    public static (string exeKey, string exePath, string[] args)? ReadAndClearLaunchRequest()
+    /// <summary>
+    /// Drain every queued request, oldest first. The elevated process acts
+    /// on all of them inside ONE IFEO-bypass window.
+    /// </summary>
+    public static List<(string exeKey, string exePath, string[] args)> DrainAllRequests()
     {
-        var path = LaunchRequestPath();
-        if (!File.Exists(path)) { Log("ReadLaunchRequest: file not found"); return null; }
-        var lines = File.ReadAllLines(path);
-        try { File.Delete(path); } catch { }
-        if (lines.Length < 2) { Log("ReadLaunchRequest: malformed"); return null; }
-        return (lines[0], lines[1], lines.Skip(2).ToArray());
+        var results = new List<(string, string, string[])>();
+        var dir = PendingDir();
+        if (!Directory.Exists(dir)) return results;
+
+        var files = Directory.GetFiles(dir, "req_*.txt").OrderBy(f => f).ToArray();
+        foreach (var f in files)
+        {
+            try
+            {
+                var lines = File.ReadAllLines(f);
+                File.Delete(f);
+                if (lines.Length < 2) continue;
+                results.Add((lines[0], lines[1], lines.Skip(2).ToArray()));
+            }
+            catch (Exception ex) { Log($"Drain skip {Path.GetFileName(f)}: {ex.Message}"); }
+        }
+        return results;
     }
 
     public static void Log(string msg)
