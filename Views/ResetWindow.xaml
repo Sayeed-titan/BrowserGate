@@ -1,6 +1,7 @@
 <Window x:Class="BrowserGate.Views.ResetWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:s="clr-namespace:BrowserGate.Services"
         Title="Reset Password" Height="540" Width="440"
         Icon="pack://application:,,,/BrowserGate.ico"
         WindowStartupLocation="CenterOwner"
@@ -128,7 +129,7 @@
                     </TextBlock>
 
                     <TextBlock Text="NEW MASTER PASSWORD" Style="{StaticResource Lbl}" Margin="0,0,0,9"/>
-                    <PasswordBox x:Name="NewPwd" Margin="0,0,0,16"/>
+                    <PasswordBox x:Name="NewPwd" Margin="0,0,0,16" s:Hint.Text="Choose a new master password"/>
 
                     <Grid>
                         <Grid.ColumnDefinitions>

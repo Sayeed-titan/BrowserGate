@@ -39,20 +39,26 @@ public partial class App : Application
             if (a.Equals("--elevated-launch", StringComparison.OrdinalIgnoreCase))
             {
                 ElevatedHelper.Log("--elevated-launch started");
-                // Brief settle so concurrent requests landing in the same
-                // moment (Chrome new-tab burst) end up in the same drain.
-                System.Threading.Thread.Sleep(200);
-                var items = ElevatedHelper.DrainAllRequests();
-                if (items.Count > 0)
+                // Settle so concurrent requests landing in the same moment
+                // (Chrome's new-tab burst fires 2-3 re-execs back-to-back)
+                // end up in the same drain pass.
+                System.Threading.Thread.Sleep(300);
+
+                int rounds = 0;
+                while (rounds < 4) // bounded loop catches late-arriving burst items
                 {
+                    var items = ElevatedHelper.DrainAllRequests();
+                    if (items.Count == 0) break;
                     try
                     {
                         EdgeLauncher.LaunchBatch(items);
-                        ElevatedHelper.Log($"LaunchBatch OK: {items.Count} item(s)");
+                        ElevatedHelper.Log($"LaunchBatch OK (round {rounds + 1}): {items.Count} item(s)");
                     }
                     catch (Exception ex) { ElevatedHelper.Log("LaunchBatch FAIL: " + ex.Message); }
+                    rounds++;
+                    System.Threading.Thread.Sleep(400); // wait for stragglers
                 }
-                else { ElevatedHelper.Log("--elevated-launch: no pending requests"); }
+                if (rounds == 0) ElevatedHelper.Log("--elevated-launch: no pending requests");
                 Shutdown(); return;
             }
             if (a.Equals("--apply", StringComparison.OrdinalIgnoreCase))
@@ -104,6 +110,9 @@ public partial class App : Application
             {
                 try
                 {
+                    // Refresh the grace window so an actively-used browser
+                    // stays unlocked beyond the initial 60 s.
+                    UnlockSession.Mark(browserExeKey);
                     ElevatedHelper.Log($"Pass-through (session unlocked): {browserExeKey} args={forwarded.Count}");
                     ElevatedHelper.RequestLaunch(browserExeKey, browserExePath, forwarded.ToArray());
                 }

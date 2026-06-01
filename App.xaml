@@ -1,6 +1,7 @@
 <Application x:Class="BrowserGate.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:s="clr-namespace:BrowserGate.Services"
              ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
         <ResourceDictionary>
@@ -159,11 +160,23 @@
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
                                     CornerRadius="10">
-                                <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"/>
+                                <Grid>
+                                    <TextBlock x:Name="ph" IsHitTestVisible="False"
+                                               Text="{Binding Path=(s:Hint.Text), RelativeSource={RelativeSource TemplatedParent}}"
+                                               Foreground="{DynamicResource FgFaint}"
+                                               FontFamily="{StaticResource UiFont}"
+                                               FontSize="14" FontWeight="Normal"
+                                               VerticalAlignment="Center"
+                                               Margin="{TemplateBinding Padding}"/>
+                                    <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"/>
+                                </Grid>
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsFocused" Value="True">
                                     <Setter TargetName="bd" Property="BorderBrush" Value="{DynamicResource Accent}"/>
+                                </Trigger>
+                                <Trigger Property="s:Hint.HasContent" Value="True">
+                                    <Setter TargetName="ph" Property="Visibility" Value="Collapsed"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -188,11 +201,23 @@
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
                                     CornerRadius="10">
-                                <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"/>
+                                <Grid>
+                                    <TextBlock x:Name="ph" IsHitTestVisible="False"
+                                               Text="{Binding Path=(s:Hint.Text), RelativeSource={RelativeSource TemplatedParent}}"
+                                               Foreground="{DynamicResource FgFaint}"
+                                               FontFamily="{StaticResource UiFont}"
+                                               FontSize="14" FontWeight="Normal"
+                                               VerticalAlignment="Center"
+                                               Margin="{TemplateBinding Padding}"/>
+                                    <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"/>
+                                </Grid>
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsFocused" Value="True">
                                     <Setter TargetName="bd" Property="BorderBrush" Value="{DynamicResource Accent}"/>
+                                </Trigger>
+                                <Trigger Property="s:Hint.HasContent" Value="True">
+                                    <Setter TargetName="ph" Property="Visibility" Value="Collapsed"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
