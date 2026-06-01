@@ -18,6 +18,7 @@ public sealed class AppConfig
     public bool LockChrome { get; set; }
     public int AutoRelockMinutes { get; set; } = 5;
     public bool IfeoInstalled { get; set; }
+    public string Theme { get; set; } = "Dark";
 }
 
 public static class ConfigStore

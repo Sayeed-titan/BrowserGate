@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Navigation;
@@ -8,6 +8,8 @@ namespace BrowserGate.Views;
 
 public partial class SetupWindow : Window
 {
+    private int _relockMinutes = 5;
+
     public SetupWindow() { InitializeComponent(); }
 
     private void Drag(object sender, MouseButtonEventArgs e) { if (e.ChangedButton == MouseButton.Left) DragMove(); }
@@ -17,6 +19,14 @@ public partial class SetupWindow : Window
     {
         Process.Start(new ProcessStartInfo(e.Uri.ToString()) { UseShellExecute = true });
         e.Handled = true;
+    }
+
+    private void RelockDown_Click(object sender, RoutedEventArgs e) => StepRelock(-1);
+    private void RelockUp_Click  (object sender, RoutedEventArgs e) => StepRelock(+1);
+    private void StepRelock(int delta)
+    {
+        _relockMinutes = Math.Clamp(_relockMinutes + delta, 0, 1440);
+        RelockVal.Text = _relockMinutes.ToString();
     }
 
     private void Save_Click(object sender, RoutedEventArgs e)
@@ -30,11 +40,9 @@ public partial class SetupWindow : Window
         if (p1.Length < 6) { ErrorTxt.Text = "Password must be at least 6 characters."; return; }
         if (p1 != p2) { ErrorTxt.Text = "Passwords do not match."; return; }
         if (!gmail.Contains('@')) { ErrorTxt.Text = "Enter a valid Gmail address."; return; }
-        if (app.Length < 12) { ErrorTxt.Text = "Enter your 16-char Gmail App Password."; return; }
+        if (app.Length < 12) { ErrorTxt.Text = "Enter your 16-character Gmail App Password."; return; }
         if (LockEdgeChk.IsChecked != true && LockChromeChk.IsChecked != true)
         { ErrorTxt.Text = "Pick at least one browser to lock."; return; }
-        if (!int.TryParse(RelockBox.Text, out var minutes) || minutes < 0 || minutes > 1440)
-        { ErrorTxt.Text = "Auto-relock must be between 0 and 1440 minutes."; return; }
 
         var (salt, hash) = ConfigStore.HashPassword(p1);
         var cfg = new AppConfig
@@ -47,8 +55,9 @@ public partial class SetupWindow : Window
             ChromePath = EdgeLauncher.FindChromePath(),
             LockEdge = LockEdgeChk.IsChecked == true,
             LockChrome = LockChromeChk.IsChecked == true,
-            AutoRelockMinutes = minutes,
-            IfeoInstalled = false
+            AutoRelockMinutes = _relockMinutes,
+            IfeoInstalled = false,
+            Theme = ThemeManager.Current
         };
         ConfigStore.Save(cfg);
 

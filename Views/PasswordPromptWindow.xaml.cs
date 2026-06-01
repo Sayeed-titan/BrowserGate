@@ -1,5 +1,6 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media.Animation;
 using BrowserGate.Services;
 
 namespace BrowserGate.Views;
@@ -10,6 +11,7 @@ public partial class PasswordPromptWindow : Window
     private readonly string _browserExeKey;
     private readonly string _browserExePath;
     private int _attempts;
+    private const int MaxAttempts = 5;
 
     public PasswordPromptWindow(string browserExeKey, string browserExePath, string[] forwardedArgs)
     {
@@ -20,7 +22,6 @@ public partial class PasswordPromptWindow : Window
         string display = browserExeKey.Equals("chrome.exe", StringComparison.OrdinalIgnoreCase)
             ? "Google Chrome" : "Microsoft Edge";
         TitleTxt.Text = $"{display} is locked";
-        HeaderTxt.Text = $"BrowserGate - {display}";
         Loaded += (_, _) => PwdBox.Focus();
     }
 
@@ -34,9 +35,14 @@ public partial class PasswordPromptWindow : Window
         if (!ConfigStore.Verify(PwdBox.Password, cfg))
         {
             _attempts++;
-            ErrorTxt.Text = $"Wrong password. Attempt {_attempts} of 5.";
+            int left = Math.Max(0, MaxAttempts - _attempts);
+            ErrorTxt.Text = left == 1
+                ? "Incorrect password · 1 attempt left"
+                : $"Incorrect password · {left} attempts left";
+            ErrorTxt.Visibility = Visibility.Visible;
             PwdBox.Clear();
-            if (_attempts >= 5) { MessageBox.Show(this, "Too many attempts.", "BrowserGate"); Close(); }
+            Shake();
+            if (_attempts >= MaxAttempts) { MessageBox.Show(this, "Too many attempts.", "BrowserGate"); Close(); }
             return;
         }
 
@@ -50,6 +56,18 @@ public partial class PasswordPromptWindow : Window
         }
         catch (Exception ex) { MessageBox.Show(this, "Launch failed: " + ex.Message, "BrowserGate"); }
         Close();
+    }
+
+    private void Shake()
+    {
+        var anim = new DoubleAnimationUsingKeyFrames();
+        anim.KeyFrames.Add(new LinearDoubleKeyFrame(0,  KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(0))));
+        anim.KeyFrames.Add(new LinearDoubleKeyFrame(-8, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(80))));
+        anim.KeyFrames.Add(new LinearDoubleKeyFrame( 8, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(160))));
+        anim.KeyFrames.Add(new LinearDoubleKeyFrame(-6, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(240))));
+        anim.KeyFrames.Add(new LinearDoubleKeyFrame( 6, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(320))));
+        anim.KeyFrames.Add(new LinearDoubleKeyFrame(0,  KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(400))));
+        ShakeTx.BeginAnimation(System.Windows.Media.TranslateTransform.XProperty, anim);
     }
 
     private void Forgot_Click(object sender, RoutedEventArgs e)

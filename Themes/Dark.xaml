@@ -1,0 +1,53 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- BrowserGate · Dark theme tokens (JMI Cafeteria ERP dark layer) -->
+
+    <!-- Surfaces -->
+    <SolidColorBrush x:Key="BgDesktop" Color="#0A0D12"/>
+    <SolidColorBrush x:Key="BgWin"      Color="#161B22"/>
+    <SolidColorBrush x:Key="BgTitlebar" Color="#11151C"/>
+    <SolidColorBrush x:Key="BgElev"     Color="#1B212B"/>
+    <SolidColorBrush x:Key="BgInset"    Color="#0F141B"/>
+    <SolidColorBrush x:Key="BgInput"    Color="#1A212C"/>
+
+    <SolidColorBrush x:Key="Border"        Color="#2A313C"/>
+    <SolidColorBrush x:Key="BorderSub"     Color="#21262D"/>
+    <SolidColorBrush x:Key="BorderStrong"  Color="#3A424E"/>
+
+    <SolidColorBrush x:Key="FgHeading" Color="#E6EDF3"/>
+    <SolidColorBrush x:Key="FgBody"    Color="#C9D1D9"/>
+    <SolidColorBrush x:Key="FgMuted"   Color="#8B949E"/>
+    <SolidColorBrush x:Key="FgFaint"   Color="#6E7681"/>
+
+    <!-- Accent (JMI teal) -->
+    <SolidColorBrush x:Key="Accent"     Color="#0A7D9A"/>
+    <SolidColorBrush x:Key="AccentSoft" Color="#2B0A7D9A"/>
+    <SolidColorBrush x:Key="AccentLine" Color="#730A7D9A"/>
+    <SolidColorBrush x:Key="AccentGlow" Color="#4D0A7D9A"/>
+    <SolidColorBrush x:Key="OnAccent"   Color="#FFFFFF"/>
+
+    <!-- Status -->
+    <SolidColorBrush x:Key="Safe"        Color="#3FB950"/>
+    <SolidColorBrush x:Key="SafeBg"      Color="#1C3FB950"/>
+    <SolidColorBrush x:Key="SafeBorder"  Color="#523FB950"/>
+    <SolidColorBrush x:Key="SafeInk"     Color="#06210D"/>
+
+    <SolidColorBrush x:Key="Danger"       Color="#F85149"/>
+    <SolidColorBrush x:Key="DangerBg"     Color="#19F85149"/>
+    <SolidColorBrush x:Key="DangerBorder" Color="#61F85149"/>
+    <SolidColorBrush x:Key="DangerInk"    Color="#2A0606"/>
+
+    <SolidColorBrush x:Key="Warn" Color="#E3B341"/>
+
+    <!-- Browser-tile accents -->
+    <SolidColorBrush x:Key="EdgeBg"     Color="#294393E8"/>
+    <SolidColorBrush x:Key="EdgeFg"     Color="#5FA8EE"/>
+    <SolidColorBrush x:Key="ChromeBg"  Color="#24EF7A52"/>
+    <SolidColorBrush x:Key="ChromeFg"  Color="#EF7A52"/>
+
+    <!-- Scrim -->
+    <SolidColorBrush x:Key="Scrim" Color="#B3080B10"/>
+
+    <!-- Caret (so input cursor is visible in both themes) -->
+    <SolidColorBrush x:Key="Caret" Color="#E6EDF3"/>
+</ResourceDictionary>

@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
@@ -9,10 +9,12 @@ namespace BrowserGate.Views;
 
 public partial class SettingsWindow : Window
 {
+    private int _relockMinutes = 5;
+
     public SettingsWindow()
     {
         InitializeComponent();
-        Refresh();
+        Loaded += (_, _) => Refresh();
     }
 
     private void Drag(object sender, MouseButtonEventArgs e) { if (e.ChangedButton == MouseButton.Left) DragMove(); }
@@ -27,24 +29,48 @@ public partial class SettingsWindow : Window
 
         LockEdgeChk.IsChecked = edge;
         LockChromeChk.IsChecked = chrome;
-        RelockBox.Text = cfg.AutoRelockMinutes.ToString();
+        EdgeStatusTxt.Text = edge ? "Locked" : "Open to anyone";
+        ChromeStatusTxt.Text = chrome ? "Locked" : "Open to anyone";
 
-        if (edge || chrome)
+        _relockMinutes = Math.Clamp(cfg.AutoRelockMinutes, 0, 1440);
+        RelockVal.Text = _relockMinutes.ToString();
+
+        // Theme segmented control
+        var theme = string.IsNullOrWhiteSpace(cfg.Theme) ? ThemeManager.Current : cfg.Theme;
+        ThemeDark.IsChecked  = theme.Equals(ThemeManager.Dark,  StringComparison.OrdinalIgnoreCase);
+        ThemeLight.IsChecked = theme.Equals(ThemeManager.Light, StringComparison.OrdinalIgnoreCase);
+
+        // Status hero
+        bool guarded = edge || chrome;
+        if (guarded)
         {
-            StatusTxt.Text = "Protected";
-            StatusSub.Text = (edge, chrome) switch
+            string which = (edge, chrome) switch
             {
-                (true, true) => "Edge and Chrome both require your password.",
-                (true, false) => "Edge requires your password.",
-                _ => "Chrome requires your password."
+                (true, true)  => "Edge and Chrome are locked.",
+                (true, false) => "Microsoft Edge is locked.",
+                _             => "Google Chrome is locked."
             };
-            StatusIcon.Background = (Brush)FindResource("Success");
+            StatusTxt.Text = "Protected";
+            StatusTxt.Foreground = (Brush)FindResource("Safe");
+            StatusSub.Text = $"{which} Auto re-lock after {_relockMinutes} min.";
+            HeroCard.Background = (Brush)FindResource("SafeBg");
+            HeroCard.BorderBrush = (Brush)FindResource("SafeBorder");
+            HeroIcon.Background = (Brush)FindResource("Safe");
+            HeroIconPath.Stroke = (Brush)FindResource("SafeInk");
+            HeroDot.Fill = (Brush)FindResource("Safe");
+            HeroIconPath.Data = Geometry.Parse("M 12,3 L 21,7 V 12 C 21,17 17,21 12,22 C 7,21 3,17 3,12 V 7 Z M 8.5,12 L 11,14.5 L 16,9");
         }
         else
         {
-            StatusTxt.Text = "Unprotected";
-            StatusSub.Text = "Browsers will open without a password.";
-            StatusIcon.Background = (Brush)FindResource("Danger");
+            StatusTxt.Text = "Not protected";
+            StatusTxt.Foreground = (Brush)FindResource("Danger");
+            StatusSub.Text = "No browsers are being locked. Anyone can open them.";
+            HeroCard.Background = (Brush)FindResource("DangerBg");
+            HeroCard.BorderBrush = (Brush)FindResource("DangerBorder");
+            HeroIcon.Background = (Brush)FindResource("Danger");
+            HeroIconPath.Stroke = (Brush)FindResource("DangerInk");
+            HeroDot.Fill = (Brush)FindResource("Danger");
+            HeroIconPath.Data = Geometry.Parse("M 12,3 L 21,7 V 12 C 21,17 17,21 12,22 C 7,21 3,17 3,12 V 7 Z M 12,8 V 13 M 12,16 V 16.5");
         }
     }
 
@@ -55,7 +81,7 @@ public partial class SettingsWindow : Window
         bool isEdge = IFEORegistrar.IsInstalled(IFEORegistrar.EdgeExe);
         bool isChrome = IFEORegistrar.IsInstalled(IFEORegistrar.ChromeExe);
 
-        if (wantEdge == isEdge && wantChrome == isChrome) return;
+        if (wantEdge == isEdge && wantChrome == isChrome) { Refresh(); return; }
 
         if (!IFEORegistrar.IsElevated())
         {
@@ -90,14 +116,35 @@ public partial class SettingsWindow : Window
         }
     }
 
-    private void SaveRelock_Click(object sender, RoutedEventArgs e)
+    private void RelockDown_Click(object sender, RoutedEventArgs e) => StepRelock(-1);
+    private void RelockUp_Click  (object sender, RoutedEventArgs e) => StepRelock(+1);
+    private void StepRelock(int delta)
     {
-        if (!int.TryParse(RelockBox.Text, out var m) || m < 0 || m > 1440)
-        { MsgTxt.Text = "Enter a number between 0 and 1440."; return; }
-        var cfg = ConfigStore.Load();
-        cfg.AutoRelockMinutes = m;
-        ConfigStore.Save(cfg);
-        MsgTxt.Text = $"Auto-relock set to {m} minute(s).";
+        _relockMinutes = Math.Clamp(_relockMinutes + delta, 0, 1440);
+        RelockVal.Text = _relockMinutes.ToString();
+        if (ConfigStore.Exists())
+        {
+            var cfg = ConfigStore.Load();
+            cfg.AutoRelockMinutes = _relockMinutes;
+            ConfigStore.Save(cfg);
+        }
+        Refresh();
+        MsgTxt.Text = _relockMinutes == 0
+            ? "Auto re-lock disabled."
+            : $"Auto re-lock set to {_relockMinutes} minute{(_relockMinutes == 1 ? "" : "s")}.";
+    }
+
+    private void ThemeDark_Click (object sender, RoutedEventArgs e) => SetTheme(ThemeManager.Dark);
+    private void ThemeLight_Click(object sender, RoutedEventArgs e) => SetTheme(ThemeManager.Light);
+    private void SetTheme(string theme)
+    {
+        ThemeManager.Apply(theme);
+        if (ConfigStore.Exists())
+        {
+            var cfg = ConfigStore.Load();
+            cfg.Theme = theme;
+            ConfigStore.Save(cfg);
+        }
     }
 
     private void Change_Click(object sender, RoutedEventArgs e)
@@ -122,7 +169,7 @@ public partial class SettingsWindow : Window
     private void Uninstall_Click(object sender, RoutedEventArgs e)
     {
         var r = MessageBox.Show(this,
-            "Remove BrowserGate completely?\n\nâ€¢ Unlocks Edge and Chrome\nâ€¢ Deletes stored config\nâ€¢ Closes the app",
+            "Remove BrowserGate completely?\n\n· Unlocks Edge and Chrome\n· Deletes stored config\n· Closes the app",
             "Uninstall BrowserGate", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (r != MessageBoxResult.Yes) return;
 

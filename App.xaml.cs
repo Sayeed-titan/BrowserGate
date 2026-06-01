@@ -12,6 +12,14 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        // Apply the user's saved theme before any window is created.
+        try
+        {
+            var initial = ConfigStore.Exists() ? ConfigStore.Load().Theme : ThemeManager.Dark;
+            ThemeManager.Apply(initial);
+        }
+        catch { ThemeManager.Apply(ThemeManager.Dark); }
+
         // ===== Elevated CLI flags =====
         for (int i = 0; i < e.Args.Length; i++)
         {

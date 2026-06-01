@@ -1,0 +1,52 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- BrowserGate · Light theme tokens (GitHub-style light surfaces, JMI teal) -->
+
+    <!-- Surfaces -->
+    <SolidColorBrush x:Key="BgDesktop"  Color="#EEF1F4"/>
+    <SolidColorBrush x:Key="BgWin"      Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="BgTitlebar" Color="#F6F8FA"/>
+    <SolidColorBrush x:Key="BgElev"     Color="#F6F8FA"/>
+    <SolidColorBrush x:Key="BgInset"    Color="#EEF1F4"/>
+    <SolidColorBrush x:Key="BgInput"    Color="#FFFFFF"/>
+
+    <SolidColorBrush x:Key="Border"        Color="#D0D7DE"/>
+    <SolidColorBrush x:Key="BorderSub"     Color="#E1E5EA"/>
+    <SolidColorBrush x:Key="BorderStrong"  Color="#AFB8C1"/>
+
+    <SolidColorBrush x:Key="FgHeading" Color="#1F2328"/>
+    <SolidColorBrush x:Key="FgBody"    Color="#424A53"/>
+    <SolidColorBrush x:Key="FgMuted"   Color="#59636E"/>
+    <SolidColorBrush x:Key="FgFaint"   Color="#818B98"/>
+
+    <!-- Accent (JMI teal, same in both themes) -->
+    <SolidColorBrush x:Key="Accent"     Color="#0A7D9A"/>
+    <SolidColorBrush x:Key="AccentSoft" Color="#1F0A7D9A"/>
+    <SolidColorBrush x:Key="AccentLine" Color="#660A7D9A"/>
+    <SolidColorBrush x:Key="AccentGlow" Color="#330A7D9A"/>
+    <SolidColorBrush x:Key="OnAccent"   Color="#FFFFFF"/>
+
+    <!-- Status -->
+    <SolidColorBrush x:Key="Safe"        Color="#1A7F37"/>
+    <SolidColorBrush x:Key="SafeBg"      Color="#191A7F37"/>
+    <SolidColorBrush x:Key="SafeBorder"  Color="#4D1A7F37"/>
+    <SolidColorBrush x:Key="SafeInk"     Color="#FFFFFF"/>
+
+    <SolidColorBrush x:Key="Danger"       Color="#CF222E"/>
+    <SolidColorBrush x:Key="DangerBg"     Color="#14CF222E"/>
+    <SolidColorBrush x:Key="DangerBorder" Color="#4DCF222E"/>
+    <SolidColorBrush x:Key="DangerInk"    Color="#FFFFFF"/>
+
+    <SolidColorBrush x:Key="Warn" Color="#BF8700"/>
+
+    <!-- Browser-tile accents -->
+    <SolidColorBrush x:Key="EdgeBg"  Color="#1F4393E8"/>
+    <SolidColorBrush x:Key="EdgeFg"  Color="#1A6FCB"/>
+    <SolidColorBrush x:Key="ChromeBg" Color="#1FEF7A52"/>
+    <SolidColorBrush x:Key="ChromeFg" Color="#C95A35"/>
+
+    <!-- Scrim -->
+    <SolidColorBrush x:Key="Scrim" Color="#660F141B"/>
+
+    <SolidColorBrush x:Key="Caret" Color="#1F2328"/>
+</ResourceDictionary>
