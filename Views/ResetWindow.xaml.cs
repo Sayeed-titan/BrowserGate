@@ -1,8 +1,8 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
-using EdgeLocker.Services;
+using BrowserGate.Services;
 
-namespace EdgeLocker.Views;
+namespace BrowserGate.Views;
 
 public partial class ResetWindow : Window
 {

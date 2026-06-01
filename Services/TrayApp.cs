@@ -1,9 +1,9 @@
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows;
-using EdgeLocker.Views;
+using BrowserGate.Views;
 using WF = System.Windows.Forms;
 
-namespace EdgeLocker.Services;
+namespace BrowserGate.Services;
 
 public sealed class TrayApp : IDisposable
 {
@@ -41,7 +41,7 @@ public sealed class TrayApp : IDisposable
         {
             Icon = BuildIcon(),
             Visible = true,
-            Text = "EdgeLocker",
+            Text = "BrowserGate",
             ContextMenuStrip = _menu
         };
         _ni.DoubleClick += (_, _) => OpenSettings();
@@ -58,10 +58,10 @@ public sealed class TrayApp : IDisposable
         bool chrome = IFEORegistrar.IsInstalled(IFEORegistrar.ChromeExe);
         item.Text = (edge, chrome) switch
         {
-            (true, true)  => "🔒 Edge + Chrome locked",
-            (true, false) => "🔒 Edge locked",
-            (false, true) => "🔒 Chrome locked",
-            _             => "🔓 Browsers not locked"
+            (true, true)  => "ðŸ”’ Edge + Chrome locked",
+            (true, false) => "ðŸ”’ Edge locked",
+            (false, true) => "ðŸ”’ Chrome locked",
+            _             => "ðŸ”“ Browsers not locked"
         };
     }
 

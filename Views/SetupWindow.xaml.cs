@@ -1,10 +1,10 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Navigation;
-using EdgeLocker.Services;
+using BrowserGate.Services;
 
-namespace EdgeLocker.Views;
+namespace BrowserGate.Views;
 
 public partial class SetupWindow : Window
 {

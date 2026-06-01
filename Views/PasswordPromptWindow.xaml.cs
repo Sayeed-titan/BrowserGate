@@ -1,8 +1,8 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
-using EdgeLocker.Services;
+using BrowserGate.Services;
 
-namespace EdgeLocker.Views;
+namespace BrowserGate.Views;
 
 public partial class PasswordPromptWindow : Window
 {
@@ -18,7 +18,7 @@ public partial class PasswordPromptWindow : Window
         string display = browserExeKey.Equals("chrome.exe", StringComparison.OrdinalIgnoreCase)
             ? "Google Chrome" : "Microsoft Edge";
         TitleTxt.Text = $"{display} is locked";
-        HeaderTxt.Text = $"EdgeLocker · {display}";
+        HeaderTxt.Text = $"BrowserGate Â· {display}";
         Loaded += (_, _) => PwdBox.Focus();
     }
 
@@ -34,7 +34,7 @@ public partial class PasswordPromptWindow : Window
             _attempts++;
             ErrorTxt.Text = $"Wrong password. Attempt {_attempts} of 5.";
             PwdBox.Clear();
-            if (_attempts >= 5) { MessageBox.Show(this, "Too many attempts.", "EdgeLocker"); Close(); }
+            if (_attempts >= 5) { MessageBox.Show(this, "Too many attempts.", "BrowserGate"); Close(); }
             return;
         }
 
@@ -48,7 +48,7 @@ public partial class PasswordPromptWindow : Window
                 ? "chrome" : "msedge";
             AutoRelock.Schedule(processName, cfg.AutoRelockMinutes);
         }
-        catch (Exception ex) { MessageBox.Show(this, "Launch failed: " + ex.Message, "EdgeLocker"); }
+        catch (Exception ex) { MessageBox.Show(this, "Launch failed: " + ex.Message, "BrowserGate"); }
         Close();
     }
 
@@ -56,6 +56,6 @@ public partial class PasswordPromptWindow : Window
     {
         var reset = new ResetWindow { Owner = this };
         if (reset.ShowDialog() == true)
-            MessageBox.Show(this, "Password updated. Enter the new password.", "EdgeLocker");
+            MessageBox.Show(this, "Password updated. Enter the new password.", "BrowserGate");
     }
 }

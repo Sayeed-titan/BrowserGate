@@ -1,6 +1,6 @@
-using System.IO;
+﻿using System.IO;
 
-namespace EdgeLocker.Services;
+namespace BrowserGate.Services;
 
 public static class Uninstaller
 {
@@ -11,7 +11,7 @@ public static class Uninstaller
 
         try
         {
-            var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EdgeLocker");
+            var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BrowserGate");
             if (Directory.Exists(dir)) Directory.Delete(dir, true);
         }
         catch { }

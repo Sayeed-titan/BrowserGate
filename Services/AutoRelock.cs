@@ -1,6 +1,6 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
-namespace EdgeLocker.Services;
+namespace BrowserGate.Services;
 
 /// <summary>
 /// After a successful unlock, waits until all instances of the browser process

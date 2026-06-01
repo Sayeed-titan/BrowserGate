@@ -1,8 +1,8 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Mail;
 using System.Security.Cryptography;
 
-namespace EdgeLocker.Services;
+namespace BrowserGate.Services;
 
 public static class MailService
 {
@@ -22,8 +22,8 @@ public static class MailService
         };
         using var msg = new MailMessage(gmail, gmail)
         {
-            Subject = "EdgeLocker — Password Reset Code",
-            Body = $"Your EdgeLocker reset code is: {otp}\n\nValid for 10 minutes. If you did not request this, ignore.",
+            Subject = "BrowserGate â€” Password Reset Code",
+            Body = $"Your BrowserGate reset code is: {otp}\n\nValid for 10 minutes. If you did not request this, ignore.",
             IsBodyHtml = false
         };
         await smtp.SendMailAsync(msg);

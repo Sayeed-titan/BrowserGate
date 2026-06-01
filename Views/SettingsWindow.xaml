@@ -1,7 +1,7 @@
-<Window x:Class="EdgeLocker.Views.SettingsWindow"
+﻿<Window x:Class="BrowserGate.Views.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="EdgeLocker" Height="620" Width="540"
+        Title="BrowserGate" Height="620" Width="540"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ResizeMode="NoResize" FontFamily="{StaticResource UiFont}">
@@ -14,7 +14,7 @@
             <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
 
             <Grid Grid.Row="0" Height="40" MouseLeftButtonDown="Drag">
-                <TextBlock Text="EdgeLocker" Foreground="{StaticResource Muted}" FontSize="12"
+                <TextBlock Text="BrowserGate" Foreground="{StaticResource Muted}" FontSize="12"
                            VerticalAlignment="Center" Margin="20,0,0,0"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Width="40" Height="40" Click="Minimize_Click" Cursor="Hand">
@@ -85,13 +85,13 @@
                     <!-- Actions -->
                     <TextBlock Text="Actions" Style="{StaticResource H2}" Margin="0,0,0,10"/>
                     <Button Content="Change master password" Style="{StaticResource GhostButton}" Click="Change_Click" Margin="0,0,0,8" HorizontalAlignment="Stretch"/>
-                    <Button Content="Test — open Edge now" Style="{StaticResource GhostButton}" Click="Test_Click" Margin="0,0,0,8" HorizontalAlignment="Stretch"/>
+                    <Button Content="Test â€” open Edge now" Style="{StaticResource GhostButton}" Click="Test_Click" Margin="0,0,0,8" HorizontalAlignment="Stretch"/>
                     <Button Content="Open config folder" Style="{StaticResource GhostButton}" Click="OpenFolder_Click" Margin="0,0,0,20" HorizontalAlignment="Stretch"/>
 
                     <Border Background="#3B0F12" CornerRadius="10" Padding="16" Margin="0,8,0,0">
                         <StackPanel>
                             <TextBlock Text="Danger zone" FontWeight="SemiBold" Foreground="{StaticResource Danger}" Margin="0,0,0,8"/>
-                            <Button Content="Uninstall EdgeLocker" Style="{StaticResource DangerButton}" Click="Uninstall_Click" HorizontalAlignment="Left"/>
+                            <Button Content="Uninstall BrowserGate" Style="{StaticResource DangerButton}" Click="Uninstall_Click" HorizontalAlignment="Left"/>
                         </StackPanel>
                     </Border>
 

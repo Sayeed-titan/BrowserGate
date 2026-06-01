@@ -1,8 +1,8 @@
-using System.Windows;
-using EdgeLocker.Services;
-using EdgeLocker.Views;
+﻿using System.Windows;
+using BrowserGate.Services;
+using BrowserGate.Views;
 
-namespace EdgeLocker;
+namespace BrowserGate;
 
 public partial class App : Application
 {
@@ -71,7 +71,7 @@ public partial class App : Application
             return;
         }
 
-        // ===== Tray mode (user double-clicked EdgeLocker.exe) =====
+        // ===== Tray mode (user double-clicked BrowserGate.exe) =====
         _tray = new TrayApp();
         var win = new SettingsWindow();
         win.Show();

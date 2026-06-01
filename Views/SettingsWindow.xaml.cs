@@ -1,11 +1,11 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using EdgeLocker.Services;
+using BrowserGate.Services;
 
-namespace EdgeLocker.Views;
+namespace BrowserGate.Views;
 
 public partial class SettingsWindow : Window
 {
@@ -111,7 +111,7 @@ public partial class SettingsWindow : Window
 
     private void OpenFolder_Click(object sender, RoutedEventArgs e)
     {
-        var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EdgeLocker");
+        var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BrowserGate");
         Directory.CreateDirectory(dir);
         Process.Start(new ProcessStartInfo("explorer.exe", dir) { UseShellExecute = true });
     }
@@ -119,8 +119,8 @@ public partial class SettingsWindow : Window
     private void Uninstall_Click(object sender, RoutedEventArgs e)
     {
         var r = MessageBox.Show(this,
-            "Remove EdgeLocker completely?\n\n• Unlocks Edge and Chrome\n• Deletes stored config\n• Closes the app",
-            "Uninstall EdgeLocker", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            "Remove BrowserGate completely?\n\nâ€¢ Unlocks Edge and Chrome\nâ€¢ Deletes stored config\nâ€¢ Closes the app",
+            "Uninstall BrowserGate", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (r != MessageBoxResult.Yes) return;
 
         if (!IFEORegistrar.IsElevated())
@@ -131,7 +131,7 @@ public partial class SettingsWindow : Window
         }
 
         Uninstaller.Run();
-        MessageBox.Show(this, "EdgeLocker has been removed. You can now delete the EdgeLocker.exe file.", "Done");
+        MessageBox.Show(this, "BrowserGate has been removed. You can now delete the BrowserGate.exe file.", "Done");
         Application.Current.Shutdown();
     }
 }

@@ -1,8 +1,8 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using Microsoft.Win32;
 
-namespace EdgeLocker.Services;
+namespace BrowserGate.Services;
 
 public static class EdgeLauncher
 {
@@ -37,7 +37,7 @@ public static class EdgeLauncher
     /// </summary>
     public static void LaunchBrowser(string exeKey, string browserPath, string[] forwardedArgs)
     {
-        using var mtx = new System.Threading.Mutex(false, "Global\\EdgeLocker_LaunchMutex");
+        using var mtx = new System.Threading.Mutex(false, "Global\\BrowserGate_LaunchMutex");
         bool taken = false;
         try { taken = mtx.WaitOne(TimeSpan.FromSeconds(5)); }
         catch (AbandonedMutexException) { taken = true; }

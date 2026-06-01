@@ -1,10 +1,10 @@
-using System.IO;
+﻿using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Konscious.Security.Cryptography;
 
-namespace EdgeLocker.Services;
+namespace BrowserGate.Services;
 
 public sealed class AppConfig
 {
@@ -23,7 +23,7 @@ public sealed class AppConfig
 public static class ConfigStore
 {
     private static readonly string Dir = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EdgeLocker");
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BrowserGate");
     private static readonly string FilePath = Path.Combine(Dir, "config.dat");
 
     public static bool Exists() => File.Exists(FilePath);
