@@ -1,0 +1,32 @@
+# Build output
+bin/
+obj/
+out/
+publish/
+*.user
+*.suo
+*.userprefs
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.swp
+
+# .NET
+project.assets.json
+*.nuget.props
+*.nuget.targets
+*.pdb
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Local config (never commit user secrets)
+config.dat
+*.local.json
+
+# Logs
+*.log
