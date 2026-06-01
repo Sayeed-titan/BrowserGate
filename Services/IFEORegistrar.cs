@@ -21,12 +21,22 @@ public static class IFEORegistrar
     {
         using var k = Registry.LocalMachine.CreateSubKey(Path(exe), true);
         k.SetValue("Debugger", $"\"{lockerExePath}\"");
+        // UseFilter + subkey "0" matching "--type=" bypasses the lock for
+        // Chromium child processes (renderer, gpu, utility, etc.) so the
+        // user is only prompted on the *initial* user-clicked launch.
+        k.SetValue("UseFilter", 1, RegistryValueKind.DWord);
+        using var sub = k.CreateSubKey("0", true);
+        sub.SetValue("FilterCommandLine", "--type=");
+        // No Debugger value here = child processes launch normally.
     }
 
     public static void Uninstall(string exe)
     {
         using var k = Registry.LocalMachine.OpenSubKey(Path(exe), true);
-        if (k?.GetValue("Debugger") != null) k.DeleteValue("Debugger", false);
+        if (k == null) return;
+        if (k.GetValue("Debugger") != null) k.DeleteValue("Debugger", false);
+        if (k.GetValue("UseFilter") != null) k.DeleteValue("UseFilter", false);
+        try { k.DeleteSubKeyTree("0", false); } catch { }
     }
 
     public static bool IsElevated()
