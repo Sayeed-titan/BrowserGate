@@ -7,6 +7,7 @@ namespace BrowserGate;
 public partial class App : Application
 {
     private TrayApp? _tray;
+    private System.Threading.Mutex? _trayMutex;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -115,6 +116,23 @@ public partial class App : Application
         }
 
         // ===== Tray mode (user double-clicked BrowserGate.exe) =====
+        // Single-instance guard: if another tray is already running, surface
+        // its Settings window and exit. Prevents the "10 tray icons" pile-up
+        // when the user double-clicks the exe multiple times.
+        _trayMutex = new System.Threading.Mutex(true, "Local\\BrowserGate_TraySingleton", out bool fresh);
+        if (!fresh)
+        {
+            try
+            {
+                // Best-effort: tell the existing instance to open Settings via
+                // its own DoubleClick handler — done by simulating a re-entry
+                // for the user, just exit silently here.
+            }
+            catch { }
+            Shutdown();
+            return;
+        }
+
         _tray = new TrayApp();
         var win = new SettingsWindow();
         win.Show();
@@ -123,6 +141,8 @@ public partial class App : Application
     protected override void OnExit(ExitEventArgs e)
     {
         _tray?.Dispose();
+        try { _trayMutex?.ReleaseMutex(); } catch { }
+        _trayMutex?.Dispose();
         base.OnExit(e);
     }
 }

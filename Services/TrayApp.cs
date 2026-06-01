@@ -1,4 +1,6 @@
-﻿using System.Drawing;
+using System.Drawing;
+using System.IO;
+using System.Reflection;
 using System.Windows;
 using BrowserGate.Views;
 using WF = System.Windows.Forms;
@@ -9,14 +11,15 @@ public sealed class TrayApp : IDisposable
 {
     private readonly WF.NotifyIcon _ni;
     private readonly WF.ContextMenuStrip _menu;
+    private readonly WF.Timer _timer;
 
     public TrayApp()
     {
         _menu = new WF.ContextMenuStrip { ShowImageMargin = false };
         var statusItem = new WF.ToolStripMenuItem { Enabled = false };
         var settingsItem = new WF.ToolStripMenuItem("Open Settings");
-        var lockNowItem = new WF.ToolStripMenuItem("Lock browsers now");
-        var quitItem = new WF.ToolStripMenuItem("Quit");
+        var lockNowItem  = new WF.ToolStripMenuItem("Lock browsers now");
+        var quitItem     = new WF.ToolStripMenuItem("Quit");
 
         settingsItem.Click += (_, _) => OpenSettings();
         lockNowItem.Click += (_, _) =>
@@ -40,7 +43,7 @@ public sealed class TrayApp : IDisposable
 
         _ni = new WF.NotifyIcon
         {
-            Icon = BuildIcon(),
+            Icon = LoadAppIcon() ?? BuildFallbackIcon(),
             Visible = true,
             Text = "BrowserGate",
             ContextMenuStrip = _menu
@@ -48,9 +51,18 @@ public sealed class TrayApp : IDisposable
         _ni.DoubleClick += (_, _) => OpenSettings();
 
         UpdateStatus(statusItem);
-        var timer = new WF.Timer { Interval = 5000 };
-        timer.Tick += (_, _) => UpdateStatus(statusItem);
-        timer.Start();
+        _timer = new WF.Timer { Interval = 5000 };
+        _timer.Tick += (_, _) => UpdateStatus(statusItem);
+        _timer.Start();
+
+        // Belt-and-braces: ensure the tray icon disappears even on unexpected shutdown.
+        AppDomain.CurrentDomain.ProcessExit += (_, _) => SafeHide();
+        Application.Current.Exit += (_, _) => SafeHide();
+    }
+
+    private void SafeHide()
+    {
+        try { _ni.Visible = false; _ni.Dispose(); } catch { }
     }
 
     private static void UpdateStatus(WF.ToolStripMenuItem item)
@@ -59,10 +71,10 @@ public sealed class TrayApp : IDisposable
         bool chrome = IFEORegistrar.IsInstalled(IFEORegistrar.ChromeExe);
         item.Text = (edge, chrome) switch
         {
-            (true, true)  => "ðŸ”’ Edge + Chrome locked",
-            (true, false) => "ðŸ”’ Edge locked",
-            (false, true) => "ðŸ”’ Chrome locked",
-            _             => "ðŸ”“ Browsers not locked"
+            (true, true)  => "Edge + Chrome locked",
+            (true, false) => "Edge locked",
+            (false, true) => "Chrome locked",
+            _             => "Browsers not locked"
         };
     }
 
@@ -73,29 +85,38 @@ public sealed class TrayApp : IDisposable
         new SettingsWindow().Show();
     }
 
-    private static Icon BuildIcon()
+    /// <summary>Load the embedded BrowserGate.ico resource at the best size for the tray.</summary>
+    private static Icon? LoadAppIcon()
     {
-        // Generate a simple lock-shaped icon at runtime so we have no asset dependency
+        try
+        {
+            var uri = new Uri("pack://application:,,,/BrowserGate.ico", UriKind.Absolute);
+            using var s = System.Windows.Application.GetResourceStream(uri)?.Stream;
+            if (s == null) return null;
+            using var ms = new MemoryStream();
+            s.CopyTo(ms);
+            ms.Position = 0;
+            return new Icon(ms, WF.SystemInformation.SmallIconSize);
+        }
+        catch { return null; }
+    }
+
+    private static Icon BuildFallbackIcon()
+    {
         var bmp = new Bitmap(32, 32);
         using (var g = Graphics.FromImage(bmp))
         {
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             g.Clear(Color.Transparent);
-            using var bg = new SolidBrush(Color.FromArgb(59, 130, 246));
+            using var bg = new SolidBrush(Color.FromArgb(10, 125, 154));
             g.FillEllipse(bg, 2, 2, 28, 28);
             using var pen = new Pen(Color.White, 2.5f);
             g.DrawArc(pen, 11, 9, 10, 10, 180, 180);
             using var body = new SolidBrush(Color.White);
             g.FillRectangle(body, 10, 16, 12, 9);
         }
-        var hIcon = bmp.GetHicon();
-        return Icon.FromHandle(hIcon);
+        return Icon.FromHandle(bmp.GetHicon());
     }
 
-    public void Dispose()
-    {
-        _ni.Visible = false;
-        _ni.Dispose();
-        _menu.Dispose();
-    }
+    public void Dispose() => SafeHide();
 }
