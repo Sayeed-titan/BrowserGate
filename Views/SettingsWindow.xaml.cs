@@ -78,6 +78,9 @@ public partial class SettingsWindow : Window
         if (wantChrome) IFEORegistrar.Install(IFEORegistrar.ChromeExe, exe);
         else IFEORegistrar.Uninstall(IFEORegistrar.ChromeExe);
 
+        if (wantEdge || wantChrome) ElevatedHelper.InstallTask(exe);
+        else ElevatedHelper.UninstallTask();
+
         if (ConfigStore.Exists())
         {
             var c = ConfigStore.Load();

@@ -27,6 +27,19 @@ public partial class App : Application
                 Uninstaller.Run();
                 Shutdown(); return;
             }
+            if (a.Equals("--elevated-launch", StringComparison.OrdinalIgnoreCase))
+            {
+                var cfg = ConfigStore.Exists() ? ConfigStore.Load() : new AppConfig();
+                var req = ElevatedHelper.ReadAndClearLaunchRequest();
+                if (req.HasValue)
+                {
+                    var (exeKey, args) = req.Value;
+                    var browserPath = exeKey.Equals("chrome.exe", StringComparison.OrdinalIgnoreCase)
+                        ? cfg.ChromePath : cfg.EdgePath;
+                    try { EdgeLauncher.LaunchBrowser(exeKey, browserPath, args); } catch { }
+                }
+                Shutdown(); return;
+            }
             if (a.Equals("--apply", StringComparison.OrdinalIgnoreCase))
             {
                 bool wantEdge = false, wantChrome = false;

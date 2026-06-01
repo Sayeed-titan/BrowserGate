@@ -18,7 +18,7 @@ public partial class PasswordPromptWindow : Window
         string display = browserExeKey.Equals("chrome.exe", StringComparison.OrdinalIgnoreCase)
             ? "Google Chrome" : "Microsoft Edge";
         TitleTxt.Text = $"{display} is locked";
-        HeaderTxt.Text = $"BrowserGate Â· {display}";
+        HeaderTxt.Text = $"BrowserGate - {display}";
         Loaded += (_, _) => PwdBox.Focus();
     }
 
@@ -40,10 +40,7 @@ public partial class PasswordPromptWindow : Window
 
         try
         {
-            string browserPath = _browserExeKey.Equals("chrome.exe", StringComparison.OrdinalIgnoreCase)
-                ? cfg.ChromePath : cfg.EdgePath;
-            EdgeLauncher.LaunchBrowser(_browserExeKey, browserPath, _forwardedArgs);
-
+            ElevatedHelper.RequestLaunch(_browserExeKey, _forwardedArgs);
             string processName = _browserExeKey.Equals("chrome.exe", StringComparison.OrdinalIgnoreCase)
                 ? "chrome" : "msedge";
             AutoRelock.Schedule(processName, cfg.AutoRelockMinutes);

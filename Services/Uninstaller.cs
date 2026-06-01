@@ -8,6 +8,7 @@ public static class Uninstaller
     {
         IFEORegistrar.Uninstall(IFEORegistrar.EdgeExe);
         IFEORegistrar.Uninstall(IFEORegistrar.ChromeExe);
+        ElevatedHelper.UninstallTask();
 
         try
         {
